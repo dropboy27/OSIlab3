@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <pthread.h>
+#include <unistd.h>
 #include "carlo.h"
 
 typedef struct {
@@ -31,7 +32,7 @@ int main(int argc, char *argv[]){
     rounds = strtoull(argv[1], &endp, 10);
     if (*endp != '\0' || rounds == 0){
         fprintf(stderr, "Bad rounds: %s\n", argv[1]);
-        return 1;
+        return 1;   
     }
 
     max_threads = (unsigned int)strtoul(argv[2], &endp, 10);
@@ -49,7 +50,9 @@ int main(int argc, char *argv[]){
     } else {
         seed = (unsigned int)time(NULL);
     }
-
+    if (max_threads > rounds) {
+        max_threads = (unsigned int)rounds;
+    }
     pthread_t threads[max_threads];
     task tasks[max_threads];
 
@@ -74,7 +77,7 @@ int main(int argc, char *argv[]){
                 fprintf(stderr, "pthread_create failed: %s\n", strerror(th));
                 break;
             }
-            created++;
+        created++;
     }
 
     for (unsigned int i = 0; i < created; i++){
